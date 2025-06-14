@@ -1,0 +1,495 @@
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planejador Semanal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <style>
+    /* Base reset and container */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Fira Mono', monospace;
+      background: linear-gradient(135deg, #000000 0%, #2a0000 100%);
+      min-height: 100vh;
+      color: #eee;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 2rem auto 4rem;
+      padding: 0 1rem;
+      animation: fadeInUp 0.8s ease-out;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      animation: slideInDown 0.8s ease-out;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    header h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #ff4444;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      user-select: none;
+    }
+
+    header p {
+      color: #ff8888;
+      font-weight: 500;
+      margin-top: 0.25rem;
+      user-select: none;
+    }
+
+    /* Categories filter */
+    .categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .category-btn {
+      background: #220000;
+      border: 1.5px solid #aa0000;
+      color: #ff4444;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .category-btn:hover,
+    .category-btn.active {
+      background: #ff0000;
+      border-color: #ff2222;
+      color: #fff;
+      box-shadow: 0 0 8px #ff2222;
+    }
+
+    /* Cards container */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+      gap: 1.5rem;
+      overflow-y: auto;
+      max-height: 60vh;
+      padding-right: 0.5rem;
+    }
+
+    /* Card style */
+    .card {
+      background: rgba(20, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 1.75rem 1.5rem 2rem;
+      box-shadow: 0 20px 40px rgba(255, 0, 0, 0.4);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .card:active {
+      cursor: grabbing;
+    }
+
+    .card:hover {
+      box-shadow: 0 30px 60px rgba(255, 0, 0, 0.7);
+      transform: translateY(-4px);
+    }
+
+    .card h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #ff4444;
+      margin-bottom: 0.75rem;
+      user-select: text;
+    }
+
+    .card p {
+      flex-grow: 1;
+      color: #ff9999;
+      margin-bottom: 1.25rem;
+      user-select: text;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .btn-link {
+      align-self: flex-start;
+      background: transparent;
+      border: 2px solid #ff4444;
+      color: #ff4444;
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-family: 'Fira Mono', monospace;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      user-select: none;
+    }
+
+    .btn-link:hover,
+    .btn-link:focus {
+      background: #ff0000;
+      border-color: #ff0000;
+      color: #fff;
+      box-shadow: 0 0 10px #ff2222;
+      outline: none;
+    }
+
+    .btn-link i {
+      font-size: 1rem;
+    }
+
+    /* Footer */
+    footer {
+      background: #110000;
+      border-top: 1px solid #440000;
+      padding: 1rem 0;
+      text-align: center;
+      color: #ff4444;
+      font-family: 'Fira Mono', monospace;
+      user-select: none;
+    }
+
+    footer .social-links {
+      margin-top: 0.5rem;
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    footer .social-links a {
+      color: #ff4444;
+      font-size: 1.5rem;
+      transition: color 0.3s ease;
+    }
+
+    footer .social-links a:hover,
+    footer .social-links a:focus {
+      color: #ff0000;
+      outline: none;
+    }
+
+    /* Scrollbar for cards container */
+    .cards::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+
+    .cards::-webkit-scrollbar-track {
+      background: #220000;
+    }
+
+    .cards::-webkit-scrollbar-thumb {
+      background: #ff4444;
+      border-radius: 4px;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 640px) {
+      header h1 {
+        font-size: 2.25rem;
+      }
+      .card {
+        font-size: 0.9rem;
+        padding: 1.25rem 1rem 1.5rem;
+      }
+      .btn-link {
+        font-size: 0.85rem;
+        padding: 0.4rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Planejador Semanal</h1>
+    <p>Organize suas tarefas da semana com cores e arraste para reorganizar</p>
+  </header>
+  <main>
+    <section class="categories" role="list" aria-label="Filtros de categorias">
+      <button type="button" class="category-btn active" data-category="all" aria-pressed="true">Todas</button>
+      <button type="button" class="category-btn" data-category="escola" aria-pressed="false">Escola</button>
+      <button type="button" class="category-btn" data-category="trabalho" aria-pressed="false">Trabalho</button>
+      <button type="button" class="category-btn" data-category="pessoal" aria-pressed="false">Pessoal</button>
+    </section>
+    <section class="cards" id="cards" aria-live="polite" aria-label="Lista de tarefas semanais" tabindex="0">
+      <!-- Cards serão inseridos via JS -->
+    </section>
+    <form id="taskForm" class="mt-8 max-w-xl mx-auto flex flex-col gap-4" aria-label="Formulário para adicionar nova tarefa">
+      <input type="text" id="taskTitle" placeholder="Título da tarefa" required aria-required="true" aria-label="Título da tarefa" class="rounded-md px-3 py-2 text-black font-semibold" />
+      <textarea id="taskDesc" placeholder="Descrição da tarefa" rows="3" aria-label="Descrição da tarefa" class="rounded-md px-3 py-2 text-black resize-y"></textarea>
+      <select id="taskCategory" aria-label="Categoria da tarefa" required class="rounded-md px-3 py-2 text-black font-semibold">
+        <option value="" disabled selected>Selecione a categoria</option>
+        <option value="escola">Escola</option>
+        <option value="trabalho">Trabalho</option>
+        <option value="pessoal">Pessoal</option>
+      </select>
+      <button type="submit" class="btn-link self-start">
+        <i class="fas fa-plus"></i> Adicionar Tarefa
+      </button>
+    </form>
+  </main>
+  <footer>
+    <div>© 2024 Planejador Semanal</div>
+    <div class="social-links" role="list" aria-label="Redes sociais">
+      <a href="https://github.com" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github"></i></a>
+      <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+      <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const cardsContainer = document.getElementById('cards');
+      const categoryButtons = document.querySelectorAll('.category-btn');
+      const taskForm = document.getElementById('taskForm');
+      const taskTitleInput = document.getElementById('taskTitle');
+      const taskDescInput = document.getElementById('taskDesc');
+      const taskCategorySelect = document.getElementById('taskCategory');
+
+      // Categories colors
+      const categoryColors = {
+        escola: 'border-yellow-500 bg-yellow-900 text-yellow-300',
+        trabalho: 'border-green-500 bg-green-900 text-green-300',
+        pessoal: 'border-blue-500 bg-blue-900 text-blue-300',
+      };
+
+      // Load tasks from localStorage or default tasks
+      let tasks = JSON.parse(localStorage.getItem('weeklyPlannerTasks')) || [];
+
+      // Save tasks to localStorage
+      function saveTasks() {
+        localStorage.setItem('weeklyPlannerTasks', JSON.stringify(tasks));
+      }
+
+      // Create card element
+      function createCard(task) {
+        const card = document.createElement('article');
+        card.className = `card border-2 ${categoryColors[task.category] || 'border-red-500 bg-red-900 text-red-300'}`;
+        card.setAttribute('draggable', 'true');
+        card.setAttribute('data-id', task.id);
+        card.setAttribute('data-category', task.category);
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-label', `Tarefa: ${task.title}, categoria ${task.category}`);
+
+        const h2 = document.createElement('h2');
+        h2.textContent = task.title;
+
+        const p = document.createElement('p');
+        p.textContent = task.description;
+
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'btn-link mt-auto self-start';
+        btnDelete.setAttribute('aria-label', `Excluir tarefa ${task.title}`);
+        btnDelete.innerHTML = '<i class="fas fa-trash-alt"></i> Excluir';
+        btnDelete.type = 'button';
+
+        btnDelete.addEventListener('click', () => {
+          tasks = tasks.filter(t => t.id !== task.id);
+          saveTasks();
+          renderTasks(currentCategory);
+        });
+
+        card.appendChild(h2);
+        card.appendChild(p);
+        card.appendChild(btnDelete);
+
+        // Drag events
+        card.addEventListener('dragstart', dragStart);
+        card.addEventListener('dragover', dragOver);
+        card.addEventListener('drop', drop);
+        card.addEventListener('dragend', dragEnd);
+
+        return card;
+      }
+
+      // Render tasks filtered by category
+      let currentCategory = 'all';
+      function renderTasks(category = 'all') {
+        currentCategory = category;
+        cardsContainer.innerHTML = '';
+        let filteredTasks = tasks;
+        if (category !== 'all') {
+          filteredTasks = tasks.filter(t => t.category === category);
+        }
+        if (filteredTasks.length === 0) {
+          const emptyMsg = document.createElement('p');
+          emptyMsg.className = 'text-center text-red-400 italic select-none';
+          emptyMsg.textContent = 'Nenhuma tarefa nesta categoria.';
+          cardsContainer.appendChild(emptyMsg);
+          return;
+        }
+        filteredTasks.forEach(task => {
+          cardsContainer.appendChild(createCard(task));
+        });
+      }
+
+      // Category buttons event
+      categoryButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          categoryButtons.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-pressed', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-pressed', 'true');
+          renderTasks(btn.dataset.category);
+        });
+      });
+
+      // Add new task
+      taskForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const title = taskTitleInput.value.trim();
+        const description = taskDescInput.value.trim();
+        const category = taskCategorySelect.value;
+        if (!title || !category) return;
+        const newTask = {
+          id: 't' + Date.now(),
+          title,
+          description,
+          category,
+        };
+        tasks.push(newTask);
+        saveTasks();
+        renderTasks(currentCategory);
+        taskForm.reset();
+        taskTitleInput.focus();
+      });
+
+      // Drag and drop logic
+      let draggedEl = null;
+
+      function dragStart(e) {
+        draggedEl = e.currentTarget;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', draggedEl.dataset.id);
+        setTimeout(() => {
+          draggedEl.classList.add('opacity-50');
+        }, 0);
+      }
+
+      function dragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const target = e.currentTarget;
+        if (target && target !== draggedEl && target.classList.contains('card')) {
+          const bounding = target.getBoundingClientRect();
+          const offset = e.clientY - bounding.top;
+          const halfHeight = bounding.height / 2;
+          const parent = target.parentNode;
+          if (offset > halfHeight) {
+            parent.insertBefore(draggedEl, target.nextSibling);
+          } else {
+            parent.insertBefore(draggedEl, target);
+          }
+        }
+      }
+
+      function drop(e) {
+        e.preventDefault();
+        draggedEl.classList.remove('opacity-50');
+        updateTasksOrder();
+      }
+
+      function dragEnd(e) {
+        draggedEl.classList.remove('opacity-50');
+        draggedEl = null;
+      }
+
+      // Update tasks array order based on DOM order
+      function updateTasksOrder() {
+        const cards = Array.from(cardsContainer.children).filter(c => c.classList.contains('card'));
+        const newOrderIds = cards.map(c => c.dataset.id);
+        // Reorder tasks array to match new order but only for currently filtered tasks
+        if (currentCategory === 'all') {
+          // reorder all tasks according to newOrderIds
+          const newTasksOrder = [];
+          newOrderIds.forEach(id => {
+            const task = tasks.find(t => t.id === id);
+            if (task) newTasksOrder.push(task);
+          });
+          // Add tasks that are not visible (filtered out) at the end in original order
+          tasks.forEach(t => {
+            if (!newOrderIds.includes(t.id)) newTasksOrder.push(t);
+          });
+          tasks = newTasksOrder;
+        } else {
+          // reorder only filtered tasks, keep others in place
+          const filteredTasks = tasks.filter(t => t.category === currentCategory);
+          const otherTasks = tasks.filter(t => t.category !== currentCategory);
+          const newFilteredOrder = [];
+          newOrderIds.forEach(id => {
+            const task = filteredTasks.find(t => t.id === id);
+            if (task) newFilteredOrder.push(task);
+          });
+          tasks = [...otherTasks, ...newFilteredOrder];
+        }
+        saveTasks();
+      }
+
+      // Initial render
+      renderTasks();
+
+    })();
+  </script>
+</body>
+</html>
